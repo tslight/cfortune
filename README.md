@@ -3,7 +3,7 @@
 *See your fortune with this handy dandy front-end to the infamous BSD fortune
 teller.*
 
-![img](./fortune.gif "Fortune")
+![img](./cfortune.gif "Fortune")
 
 ## INSTALLATION
 

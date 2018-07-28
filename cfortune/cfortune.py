@@ -1,10 +1,10 @@
 import curses
 
 
-def get_fortune():
+def get_fortune(arg):
     from subprocess import check_output
     try:
-        fortune = check_output(["fortune"])
+        fortune = check_output(["fortune", arg])
     except:
         fortune = "You have no future."
     return fortune
@@ -17,7 +17,6 @@ def color():
     curses.init_pair(4, curses.COLOR_BLUE, curses.COLOR_BLACK)
     curses.init_pair(5, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
     curses.init_pair(6, curses.COLOR_CYAN, curses.COLOR_BLACK)
-
     curses.init_pair(7, curses.COLOR_RED, curses.COLOR_WHITE)
     curses.init_pair(8, curses.COLOR_GREEN, curses.COLOR_WHITE)
     curses.init_pair(9, curses.COLOR_YELLOW, curses.COLOR_WHITE)
@@ -36,23 +35,19 @@ def header(screen):
 def body(screen):
     div = curses.newwin(curses.LINES - 2, curses.COLS, 1, 0)
     div.box()  # draw border around container window
-
     # use a sub-window so we don't clobber the the container window's border.
     txt = div.subwin(curses.LINES - 5, curses.COLS - 6, 2, 2)
-    write_fortune(txt)
-
+    write_fortune(txt, '-a')
     # update internal window data structures
     screen.noutrefresh()
     div.noutrefresh()
-
     # redraw the screen
     curses.doupdate()
-
     return div, txt
 
 
-def write_fortune(txt):
-    fortune = get_fortune()
+def write_fortune(txt, arg):
+    fortune = get_fortune(arg)
     txt.clear()
     txt.addstr(fortune)
     txt.refresh()
@@ -61,12 +56,16 @@ def write_fortune(txt):
 def eventloop(div, txt, screen):
     while True:
         c = div.getch()
-
         if c == ord('f') or c == ord('F') or c == ord(' '):
-            write_fortune(txt)
+            arg = "-a"
         elif c == ord('q') or c == ord('Q') or c == 27:
             break
-
+        else:
+            arg = "-" + chr(c)
+        try:
+            write_fortune(txt, arg)
+        except:
+            pass
         # refresh the windows from the bottom up
         screen.noutrefresh()
         div.noutrefresh()
@@ -75,7 +74,7 @@ def eventloop(div, txt, screen):
 
 
 def footer(screen):
-    msg = " Press (f) for a new fortune, (q) to quit. "
+    msg = " Press (f) for a new fortune, (q) to quit."
     screen.addstr(curses.LINES - 1, 0, msg)
     screen.chgat(curses.LINES - 1, 7, 3, curses.A_BOLD | curses.color_pair(3))
     screen.chgat(curses.LINES - 1, 30, 3, curses.A_BOLD | curses.color_pair(3))

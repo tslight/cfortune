@@ -49,7 +49,8 @@ def body(screen):
     div.box()  # draw border around container window
     # use a sub-window so we don't clobber the the container window's border.
     txt = div.subwin(curses.LINES - 5, curses.COLS - 4, 2, 2)
-    msg = fortune(txt, '-a')
+    args = ['fortune', '-a']
+    msg = fortune(txt, args)
     # update internal window data structures
     screen.noutrefresh()
     div.noutrefresh()
@@ -58,11 +59,11 @@ def body(screen):
     return div, txt, msg
 
 
-def fortune(txt, arg):
+def fortune(txt, args):
     err, out = (None,)*2
     txt.erase()
     try:
-        out = subprocess.check_output(["fortune", arg])
+        out = subprocess.check_output(args)
     except TypeError:
         err = "The soothsayer does not like being touched in that way."
     except subprocess.CalledProcessError:
@@ -113,20 +114,30 @@ def key(div, txt, msg):
     save = False
     c = div.getch()
     if c == ord('\n') or c == ord(' '):
-        msg = fortune(txt, '-a')
+        args = ['fortune', '-a']
+        msg = fortune(txt, args)
     elif c == ord('f') or c == ord('F'):
         prompt = "Enter a fortune topic:"
-        arg = txtbox(txt, prompt).strip()
+        args = ['fortune', txtbox(txt, prompt).strip(), '2>', '/dev/null']
         txt.erase()
-        msg = fortune(txt, arg)
+        msg = fortune(txt, args)
+    elif c == ord('m') or c == ord('M'):
+        prompt = "Enter a search string:"
+        args = ['fortune', '-m',
+                txtbox(txt, prompt).strip(), '2>', '/dev/null']
+        txt.erase()
+        msg = fortune(txt, args)
     elif c == ord('w') or c == ord('W'):
         save = True
     elif c == ord('s') or c == ord('S'):
-        msg = fortune(txt, '-s')
+        args = ['fortune', '-s']
+        msg = fortune(txt, args)
     elif c == ord('l') or c == ord('L'):
-        msg = fortune(txt, '-l')
+        args = ['fortune', '-l', '-n', '300']
+        msg = fortune(txt, args)
     elif c == ord('o') or c == ord('O'):
-        msg = fortune(txt, '-o')
+        args = ['fortune', '-o']
+        msg = fortune(txt, args)
     elif c == ord('h') or c == ord('H') or c == ord('?'):
         show(txt)
     elif c == ord('q') or c == ord('Q') or c == ESC:

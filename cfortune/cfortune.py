@@ -162,10 +162,10 @@ def savemsg(txt, msg):
     finally:
         txt.erase()
         if err:
-            txt.addstr(err, curses.color_pair(1) | curses.A_BOLD)
+            txt.addstr(4, 0, err, curses.color_pair(1) | curses.A_BOLD)
             savemsg(txt, msg)
         elif out:
-            txt.addstr(out, curses.color_pair(3) | curses.A_BOLD)
+            txt.addstr(0, 0, out, curses.color_pair(3) | curses.A_BOLD)
         txt.refresh()
     return msg
 

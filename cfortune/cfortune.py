@@ -64,30 +64,48 @@ def fortune(txt, arg):
         txt.refresh()
 
 
-def key(div):
-    arg = None
+def show(txt):
+    from textwrap import dedent
+    msg = '''
+        KEYBINDINGS:
+
+        f, F, SPC    Display any old fortune.
+        s, S         Display a short fortunes.
+        l, L         Display a long fortune.
+        o, O,        Display an offensive fortune.
+        ?, h, H      Display this help page.
+        q, Q, ESC    Quit and display all marked paths.
+
+        '''
+    txt.erase()
+    try:
+        msg = dedent(msg).strip()
+        txt.addstr(msg)
+    except:
+        msg = "The soothsayer is squished!"
+        txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
+    txt.refresh()
+
+
+def key(div, txt):
     c = div.getch()
     if c == ord('f') or c == ord('F') or c == ord(' '):
-        arg = "-a"
+        fortune(txt, '-a')
     elif c == ord('s') or c == ord('S'):
-        arg = "-s"
+        fortune(txt, '-s')
     elif c == ord('l') or c == ord('L'):
-        arg = "-l"
+        fortune(txt, '-l')
     elif c == ord('o') or c == ord('O'):
-        arg = "-o"
+        fortune(txt, '-o')
+    elif c == ord('h') or c == ord('H') or c == ord('?'):
+        show(txt)
     elif c == ord('q') or c == ord('Q') or c == 27:
-        arg = "quit"
-    elif c == curses.KEY_RESIZE:
-        pass
-    return arg
+        quit()
 
 
 def eventloop(div, txt, screen):
     while True:
-        arg = key(div)
-        if arg == "quit":
-            return
-        fortune(txt, arg)
+        key(div, txt)
         # refresh the windows from the bottom up
         screen.noutrefresh()
         div.noutrefresh()

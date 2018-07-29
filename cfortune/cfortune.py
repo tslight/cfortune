@@ -71,12 +71,13 @@ def show(txt):
     msg = '''
         KEYBINDINGS:
 
-        f, F, SPC  :  Display any old fortune.
-        s, S       :  Display a short fortune.
-        l, L       :  Display a long fortune.
-        o, O,      :  Display an offensive fortune.
-        ?, h, H    :  Display this help page.
-        q, Q, ESC  :  Quit and display all marked paths.
+        f, F, SPC : Display any old fortune.
+        s         : Display a short fortune.
+        l         : Display a long fortune.
+        o         : Display an offensive fortune.
+        ?, h      : Display this help page.
+        S         : Save your fortune.
+        q, ESC    : Quit and display all marked paths.
 
         Good luck & God speed!
         '''
@@ -118,7 +119,7 @@ def key(div, txt, msg):
 def eventloop(screen, div, txt, msg):
     from pathlib import Path
     home = str(Path.home())
-    fortunes = home + "/Desktop/fortunes.txt"
+    fortunes = home + "/fortunes.txt"
     while True:
         msg, save = key(div, txt, msg)
         if save:

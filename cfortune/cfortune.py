@@ -123,7 +123,7 @@ def getfile(txt):
     txt.addstr(0, 0, "Enter a file name (Enter c or q to cancel):")
     txt.refresh()
     y, x = txt.getmaxyx()
-    tb = txt.subwin(1, x - 1, 3, 2)
+    tb = txt.subwin(1, x - 1, 4, 2)
     box = Textbox(tb)
     txt.refresh
     box.edit()
@@ -154,12 +154,12 @@ def savemsg(txt, msg):
     else:
         out = "Saved fortune to " + path
     finally:
+        txt.erase()
         if err:
-            txt.erase()
-            txt.addstr(2, 0, err, curses.color_pair(1) | curses.A_BOLD)
+            txt.addstr(4, 0, err, curses.color_pair(1) | curses.A_BOLD)
             savemsg(txt, msg)
         elif out:
-            txt.addstr(2, 0, out, curses.color_pair(3) | curses.A_BOLD)
+            txt.addstr(1, 0, out, curses.color_pair(3) | curses.A_BOLD)
         txt.refresh()
 
 

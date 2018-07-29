@@ -48,20 +48,34 @@ def body(screen):
 
 def write_fortune(txt, arg):
     fortune = get_fortune(arg)
-    txt.clear()
+    txt.erase()
     txt.addstr(fortune)
     txt.refresh()
 
 
+def key(div):
+    arg = None
+    c = div.getch()
+    if c == ord('f') or c == ord('F') or c == ord(' '):
+        arg = "-a"
+    elif c == ord('s') or c == ord('S'):
+        arg = "-s"
+    elif c == ord('l') or c == ord('L'):
+        arg = "-l"
+    elif c == ord('o') or c == ord('O'):
+        arg = "-o"
+    elif c == ord('q') or c == ord('Q') or c == 27:
+        arg = "quit"
+    elif c == curses.KEY_RESIZE:
+        pass
+    return arg
+
+
 def eventloop(div, txt, screen):
     while True:
-        c = div.getch()
-        if c == ord('f') or c == ord('F') or c == ord(' '):
-            arg = "-a"
-        elif c == ord('q') or c == ord('Q') or c == 27:
-            break
-        else:
-            arg = "-" + chr(c)
+        arg = key(div)
+        if arg == "quit":
+            return
         try:
             write_fortune(txt, arg)
         except:

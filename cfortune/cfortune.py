@@ -108,6 +108,7 @@ def show(txt):
 
 
 def key(div, txt, msg):
+    from textwrap import dedent
     from os import environ
     environ.setdefault('ESCDELAY', '12')  # otherwise it takes an age!
     ESC = 27
@@ -165,7 +166,7 @@ def savemsg(txt, msg):
     s = str(msg.decode("ascii"))
     home = str(Path.home())
     prompt = "Enter a file name (or c to cancel):"
-    name = getfile(txt, prompt)
+    name = txtbox(txt, prompt)
     if not name == 'c ':
         path = home + "/" + name
     try:

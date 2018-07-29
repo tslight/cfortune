@@ -27,10 +27,11 @@ def header(screen):
 
 
 def footer(screen):
-    msg = " Press (f) for a new fortune, (q) to quit."
+    msg = " Press (f) for a new fortune, (h) for help, or (q) to quit."
     screen.addstr(curses.LINES - 1, 0, msg)
     screen.chgat(curses.LINES - 1, 7, 3, curses.A_BOLD | curses.color_pair(3))
     screen.chgat(curses.LINES - 1, 30, 3, curses.A_BOLD | curses.color_pair(3))
+    screen.chgat(curses.LINES - 1, 47, 3, curses.A_BOLD | curses.color_pair(3))
 
 
 def body(screen):
@@ -47,7 +48,7 @@ def body(screen):
     return div, txt
 
 
-def fortune(txt, arg):
+def fortune(txt, arg, save=False):
     from subprocess import check_output
     try:
         txt.erase()
@@ -62,6 +63,7 @@ def fortune(txt, arg):
         txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
     finally:
         txt.refresh()
+    return msg
 
 
 def show(txt):
@@ -69,18 +71,21 @@ def show(txt):
     msg = '''
         KEYBINDINGS:
 
-        f, F, SPC    Display any old fortune.
-        s, S         Display a short fortunes.
-        l, L         Display a long fortune.
-        o, O,        Display an offensive fortune.
-        ?, h, H      Display this help page.
-        q, Q, ESC    Quit and display all marked paths.
+        f, F, SPC  :  Display any old fortune.
+        s, S       :  Display a short fortune.
+        l, L       :  Display a long fortune.
+        o, O,      :  Display an offensive fortune.
+        ?, h, H    :  Display this help page.
+        q, Q, ESC  :  Quit and display all marked paths.
 
+        Good luck & God speed!
         '''
     txt.erase()
     try:
         msg = dedent(msg).strip()
         txt.addstr(msg)
+        txt.chgat(0, 0, curses.A_BOLD | curses.color_pair(3))
+        txt.chgat(9, 0, curses.A_BOLD | curses.color_pair(3))
     except:
         msg = "The soothsayer is squished!"
         txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
@@ -88,10 +93,15 @@ def show(txt):
 
 
 def key(div, txt):
+    from os import environ
+    environ.setdefault('ESCDELAY', '12')  # otherwise it takes an age!
+    ESC = 27
     c = div.getch()
     if c == ord('f') or c == ord('F') or c == ord(' '):
         fortune(txt, '-a')
-    elif c == ord('s') or c == ord('S'):
+    elif c == ord('S'):
+        fortune(txt, '-a')
+    elif c == ord('s'):
         fortune(txt, '-s')
     elif c == ord('l') or c == ord('L'):
         fortune(txt, '-l')
@@ -99,7 +109,7 @@ def key(div, txt):
         fortune(txt, '-o')
     elif c == ord('h') or c == ord('H') or c == ord('?'):
         show(txt)
-    elif c == ord('q') or c == ord('Q') or c == 27:
+    elif c == ord('q') or c == ord('Q') or c == ESC:
         quit()
 
 

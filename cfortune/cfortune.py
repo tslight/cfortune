@@ -36,7 +36,7 @@ def body(screen):
     div = curses.newwin(curses.LINES - 2, curses.COLS, 1, 0)
     div.box()  # draw border around container window
     # use a sub-window so we don't clobber the the container window's border.
-    txt = div.subwin(curses.LINES - 5, curses.COLS - 6, 2, 2)
+    txt = div.subwin(curses.LINES - 5, curses.COLS - 4, 2, 2)
     write_fortune(txt, '-a')
     # update internal window data structures
     screen.noutrefresh()

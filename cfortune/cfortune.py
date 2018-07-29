@@ -27,11 +27,19 @@ def header(screen):
 
 
 def footer(screen):
-    msg = " Press (f) for a new fortune, (h) for help, or (q) to quit."
-    screen.addstr(curses.LINES - 1, 0, msg)
-    screen.chgat(curses.LINES - 1, 7, 3, curses.A_BOLD | curses.color_pair(3))
-    screen.chgat(curses.LINES - 1, 30, 3, curses.A_BOLD | curses.color_pair(3))
-    screen.chgat(curses.LINES - 1, 47, 3, curses.A_BOLD | curses.color_pair(3))
+    msg = " [SPC] for fortunes, [h] for help, [w] to save, [q] to quit."
+    try:
+        screen.addstr(curses.LINES - 1, 0, msg)
+        screen.chgat(curses.LINES - 1, 1, 5,
+                     curses.A_BOLD | curses.color_pair(3))
+        screen.chgat(curses.LINES - 1, 21, 3,
+                     curses.A_BOLD | curses.color_pair(3))
+        screen.chgat(curses.LINES - 1, 35, 3,
+                     curses.A_BOLD | curses.color_pair(3))
+        screen.chgat(curses.LINES - 1, 48, 3,
+                     curses.A_BOLD | curses.color_pair(3))
+    except:
+        pass
 
 
 def body(screen):
@@ -51,7 +59,6 @@ def body(screen):
 def fortune(txt, arg):
     from subprocess import check_output
     try:
-        txt.erase()
         msg = check_output(["fortune", arg])
         txt.addstr(msg)
     except TypeError:
@@ -71,13 +78,13 @@ def show(txt):
     msg = '''
         KEYBINDINGS:
 
-        f, F, SPC : Display any old fortune.
-        s         : Display a short fortune.
-        l         : Display a long fortune.
-        o         : Display an offensive fortune.
-        ?, h      : Display this help page.
-        S         : Save your fortune.
-        q, ESC    : Quit and display all marked paths.
+        RET, SPC    : Display any old fortune.
+        s           : Display a short fortune.
+        l           : Display a long fortune.
+        o           : Display an offensive fortune.
+        ?, h        : Display this help page.
+        w           : Save your fortune.
+        q, ESC      : Quit and display all marked paths.
 
         Good luck & God speed!
         '''
@@ -85,9 +92,8 @@ def show(txt):
     try:
         msg = dedent(msg).strip()
         txt.addstr(msg)
-        txt.chgat(0, 0, curses.color_pair(3) |
-                  curses.A_BOLD | curses.A_UNDERLINE)
-        txt.chgat(9, 0, curses.color_pair(3) | curses.A_BOLD)
+        txt.chgat(0, 0, curses.color_pair(3) | curses.A_BOLD)
+        txt.chgat(10, 0, curses.color_pair(3) | curses.A_BOLD)
     except:
         msg = "The soothsayer is squished!"
         txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
@@ -100,11 +106,11 @@ def key(div, txt, msg):
     ESC = 27
     save = False
     c = div.getch()
-    if c == ord('f') or c == ord('F') or c == ord(' '):
+    if c == ord('\n') or c == ord(' '):
         msg = fortune(txt, '-a')
-    elif c == ord('S'):
+    elif c == ord('w') or c == ord('W'):
         save = True
-    elif c == ord('s'):
+    elif c == ord('s') or c == ord('S'):
         msg = fortune(txt, '-s')
     elif c == ord('l') or c == ord('L'):
         msg = fortune(txt, '-l')
@@ -120,7 +126,7 @@ def key(div, txt, msg):
 def getfile(txt):
     from curses.textpad import Textbox
     curses.curs_set(1)
-    txt.addstr(0, 0, "Enter a file name (Enter c or q to cancel):")
+    txt.addstr(0, 0, "Enter a file name (or c to cancel):")
     txt.refresh()
     y, x = txt.getmaxyx()
     tb = txt.subwin(1, x - 1, 4, 2)
@@ -133,12 +139,11 @@ def getfile(txt):
 
 def savemsg(txt, msg):
     from pathlib import Path
-    err = None
-    out = None
+    err, out = (None,)*2
     s = str(msg.decode("ascii"))
     home = str(Path.home())
     name = getfile(txt)
-    if not (name == 'c ' or name == 'q '):
+    if not name == 'c ':
         path = home + "/" + name
     try:
         # removes need to use f.close
@@ -148,7 +153,7 @@ def savemsg(txt, msg):
         err = "Can't find " + path
     except IsADirectoryError:
         err = path + " is a directory."
-    except UnboundLocalError:
+    except UnboundLocalError:  # bit of a hack but fuck it
         out = "Not saving fortune."
     except Exception:
         err = "Something went wrong..."
@@ -157,19 +162,19 @@ def savemsg(txt, msg):
     finally:
         txt.erase()
         if err:
-            txt.addstr(4, 0, err, curses.color_pair(1) | curses.A_BOLD)
+            txt.addstr(err, curses.color_pair(1) | curses.A_BOLD)
             savemsg(txt, msg)
         elif out:
-            txt.addstr(1, 0, out, curses.color_pair(3) | curses.A_BOLD)
+            txt.addstr(out, curses.color_pair(3) | curses.A_BOLD)
         txt.refresh()
     return msg
 
 
 def eventloop(screen, div, txt, msg):
     while True:
+        txt.erase()
         msg, save = key(div, txt, msg)
         if save:
-            txt.erase()
             msg = savemsg(txt, msg)
         # refresh the windows from the bottom up
         screen.noutrefresh()

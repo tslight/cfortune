@@ -7,16 +7,16 @@ teller.*
 
 ## KEYBINDINGS
 
-| KEY    | ACTION                        |
-|:-------|:------------------------------|
-| f SPC  | Display any old fortune.      |
-| s      | Display a short fortune.      |
-| l      | Display a long fortune.       |
-| o      | Display an offensive fortune. |
-| ?, h   | Display this help page.       |
-| S      | Save your fortune.            |
-| q, ESC | Quit.                         |
-|        |                               |
+| KEY      | ACTION                        |
+|:---------|:------------------------------|
+| RET, SPC | Display any old fortune.      |
+| s        | Display a short fortune.      |
+| l        | Display a long fortune.       |
+| o        | Display an offensive fortune. |
+| ?, h     | Display this help page.       |
+| w        | Save your fortune.            |
+| q, ESC   | Quit.                         |
+
 
 ## INSTALLATION
 

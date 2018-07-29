@@ -39,16 +39,16 @@ def body(screen):
     div.box()  # draw border around container window
     # use a sub-window so we don't clobber the the container window's border.
     txt = div.subwin(curses.LINES - 5, curses.COLS - 4, 2, 2)
-    fortune(txt, '-a')
+    msg = fortune(txt, '-a')
     # update internal window data structures
     screen.noutrefresh()
     div.noutrefresh()
     # redraw the screen
     curses.doupdate()
-    return div, txt
+    return div, txt, msg
 
 
-def fortune(txt, arg, save=False):
+def fortune(txt, arg):
     from subprocess import check_output
     try:
         txt.erase()
@@ -92,30 +92,44 @@ def show(txt):
     txt.refresh()
 
 
-def key(div, txt):
+def key(div, txt, msg):
     from os import environ
     environ.setdefault('ESCDELAY', '12')  # otherwise it takes an age!
     ESC = 27
+    save = False
     c = div.getch()
     if c == ord('f') or c == ord('F') or c == ord(' '):
-        fortune(txt, '-a')
+        msg = fortune(txt, '-a')
     elif c == ord('S'):
-        fortune(txt, '-a')
+        save = True
     elif c == ord('s'):
-        fortune(txt, '-s')
+        msg = fortune(txt, '-s')
     elif c == ord('l') or c == ord('L'):
-        fortune(txt, '-l')
+        msg = fortune(txt, '-l')
     elif c == ord('o') or c == ord('O'):
-        fortune(txt, '-o')
+        msg = fortune(txt, '-o')
     elif c == ord('h') or c == ord('H') or c == ord('?'):
         show(txt)
     elif c == ord('q') or c == ord('Q') or c == ESC:
         quit()
+    return msg, save
 
 
-def eventloop(div, txt, screen):
+def eventloop(screen, div, txt, msg):
+    from pathlib import Path
+    home = str(Path.home())
+    fortunes = home + "/Desktop/fortunes.txt"
     while True:
-        key(div, txt)
+        msg, save = key(div, txt, msg)
+        if save:
+            s = str(msg.decode("ascii"))
+            # removes need to use f.close
+            with open(fortunes, 'a+') as f:
+                f.write("\n" + s + "\n")
+            out = "Saved fortune to " + fortunes
+            txt.erase()
+            txt.addstr(out, curses.color_pair(3) | curses.A_BOLD)
+            txt.refresh()
         # refresh the windows from the bottom up
         screen.noutrefresh()
         div.noutrefresh()
@@ -128,5 +142,5 @@ def cfortune(screen):
     color()
     header(screen)
     footer(screen)
-    div, txt = body(screen)
-    eventloop(div, txt, screen)
+    div, txt, msg = body(screen)
+    eventloop(screen, div, txt, msg)

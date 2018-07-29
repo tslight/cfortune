@@ -138,9 +138,8 @@ def savemsg(txt, msg):
     s = str(msg.decode("ascii"))
     home = str(Path.home())
     name = getfile(txt)
-    if name == 'c ' or name == 'q ':
-        return
-    path = home + "/" + name
+    if not (name == 'c ' or name == 'q '):
+        path = home + "/" + name
     try:
         # removes need to use f.close
         with open(path, 'a+') as f:
@@ -149,6 +148,8 @@ def savemsg(txt, msg):
         err = "Can't find " + path
     except IsADirectoryError:
         err = path + " is a directory."
+    except UnboundLocalError:
+        out = "Not saving fortune."
     except Exception:
         err = "Something went wrong..."
     else:
@@ -161,6 +162,7 @@ def savemsg(txt, msg):
         elif out:
             txt.addstr(1, 0, out, curses.color_pair(3) | curses.A_BOLD)
         txt.refresh()
+    return msg
 
 
 def eventloop(screen, div, txt, msg):
@@ -168,7 +170,7 @@ def eventloop(screen, div, txt, msg):
         msg, save = key(div, txt, msg)
         if save:
             txt.erase()
-            savemsg(txt, msg)
+            msg = savemsg(txt, msg)
         # refresh the windows from the bottom up
         screen.noutrefresh()
         div.noutrefresh()

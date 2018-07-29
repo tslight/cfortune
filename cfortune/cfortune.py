@@ -138,7 +138,7 @@ def savemsg(txt, msg):
     s = str(msg.decode("ascii"))
     home = str(Path.home())
     name = getfile(txt)
-    if name == "c" or name == "q":
+    if name == 'c ' or name == 'q ':
         return
     path = home + "/" + name
     try:

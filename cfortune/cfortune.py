@@ -115,7 +115,7 @@ def key(div, txt, msg):
     if c == ord('\n') or c == ord(' '):
         msg = fortune(txt, '-a')
     elif c == ord('f') or c == ord('F'):
-        prompt = "Enter a fortune topic (c to cancel):"
+        prompt = "Enter a fortune topic:"
         arg = txtbox(txt, prompt).strip()
         txt.erase()
         msg = fortune(txt, arg)

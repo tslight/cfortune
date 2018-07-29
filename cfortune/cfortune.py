@@ -1,13 +1,15 @@
 import curses
+from cgitb import enable
+# Get more detailed traceback reports
+enable(format="text")  # https://pymotw.com/2/cgitb/
 
 
 def get_fortune(arg):
     from subprocess import check_output
     try:
-        fortune = check_output(["fortune", arg])
+        return check_output(["fortune", arg])
     except:
-        fortune = "You have no future."
-    return fortune
+        return "You have no future."
 
 
 def color():
@@ -47,10 +49,16 @@ def body(screen):
 
 
 def write_fortune(txt, arg):
-    fortune = get_fortune(arg)
     txt.erase()
-    txt.addstr(fortune)
-    txt.refresh()
+    fortune = get_fortune(arg)
+    try:
+        txt.addstr(fortune)
+    except Exception:
+        txt.erase()
+        msg = "The *nix soothsayer likes a larger terminal than this."
+        txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
+    finally:
+        txt.refresh()
 
 
 def key(div):
@@ -76,10 +84,7 @@ def eventloop(div, txt, screen):
         arg = key(div)
         if arg == "quit":
             return
-        try:
-            write_fortune(txt, arg)
-        except:
-            pass
+        write_fortune(txt, arg)
         # refresh the windows from the bottom up
         screen.noutrefresh()
         div.noutrefresh()

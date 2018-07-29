@@ -85,8 +85,9 @@ def show(txt):
     try:
         msg = dedent(msg).strip()
         txt.addstr(msg)
-        txt.chgat(0, 0, curses.A_BOLD | curses.color_pair(3))
-        txt.chgat(9, 0, curses.A_BOLD | curses.color_pair(3))
+        txt.chgat(0, 0, curses.color_pair(3) |
+                  curses.A_BOLD | curses.A_UNDERLINE)
+        txt.chgat(9, 0, curses.color_pair(3) | curses.A_BOLD)
     except:
         msg = "The soothsayer is squished!"
         txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
@@ -116,21 +117,58 @@ def key(div, txt, msg):
     return msg, save
 
 
-def eventloop(screen, div, txt, msg):
+def getfile(txt):
+    from curses.textpad import Textbox
+    curses.curs_set(1)
+    txt.addstr(0, 0, "Enter a file name (Enter c or q to cancel):")
+    txt.refresh()
+    y, x = txt.getmaxyx()
+    tb = txt.subwin(1, x - 1, 3, 2)
+    box = Textbox(tb)
+    txt.refresh
+    box.edit()
+    curses.curs_set(0)
+    return box.gather()
+
+
+def savemsg(txt, msg):
     from pathlib import Path
+    err = None
+    out = None
+    s = str(msg.decode("ascii"))
     home = str(Path.home())
-    fortunes = home + "/fortunes.txt"
+    name = getfile(txt)
+    if name == "c" or name == "q":
+        return
+    path = home + "/" + name
+    try:
+        # removes need to use f.close
+        with open(path, 'a+') as f:
+            f.write("\n" + s + "\n")
+    except FileNotFoundError:
+        err = "Can't find " + path
+    except IsADirectoryError:
+        err = path + " is a directory."
+    except Exception:
+        err = "Something went wrong..."
+    else:
+        out = "Saved fortune to " + path
+    finally:
+        if err:
+            txt.erase()
+            txt.addstr(2, 0, err, curses.color_pair(1) | curses.A_BOLD)
+            savemsg(txt, msg)
+        elif out:
+            txt.addstr(2, 0, out, curses.color_pair(3) | curses.A_BOLD)
+        txt.refresh()
+
+
+def eventloop(screen, div, txt, msg):
     while True:
         msg, save = key(div, txt, msg)
         if save:
-            s = str(msg.decode("ascii"))
-            # removes need to use f.close
-            with open(fortunes, 'a+') as f:
-                f.write("\n" + s + "\n")
-            out = "Saved fortune to " + fortunes
             txt.erase()
-            txt.addstr(out, curses.color_pair(3) | curses.A_BOLD)
-            txt.refresh()
+            savemsg(txt, msg)
         # refresh the windows from the bottom up
         screen.noutrefresh()
         div.noutrefresh()

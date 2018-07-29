@@ -108,7 +108,6 @@ def show(txt):
 
 
 def key(div, txt, msg):
-    from textwrap import dedent
     from os import environ
     environ.setdefault('ESCDELAY', '12')  # otherwise it takes an age!
     ESC = 27

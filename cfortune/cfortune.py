@@ -4,14 +4,6 @@ from cgitb import enable
 enable(format="text")  # https://pymotw.com/2/cgitb/
 
 
-def get_fortune(arg):
-    from subprocess import check_output
-    try:
-        return check_output(["fortune", arg])
-    except:
-        return "You have no future."
-
-
 def color():
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
@@ -34,12 +26,19 @@ def header(screen):
     screen.chgat(-1, curses.color_pair(10) | curses.A_BOLD | curses.A_REVERSE)
 
 
+def footer(screen):
+    msg = " Press (f) for a new fortune, (q) to quit."
+    screen.addstr(curses.LINES - 1, 0, msg)
+    screen.chgat(curses.LINES - 1, 7, 3, curses.A_BOLD | curses.color_pair(3))
+    screen.chgat(curses.LINES - 1, 30, 3, curses.A_BOLD | curses.color_pair(3))
+
+
 def body(screen):
     div = curses.newwin(curses.LINES - 2, curses.COLS, 1, 0)
     div.box()  # draw border around container window
     # use a sub-window so we don't clobber the the container window's border.
     txt = div.subwin(curses.LINES - 5, curses.COLS - 4, 2, 2)
-    write_fortune(txt, '-a')
+    fortune(txt, '-a')
     # update internal window data structures
     screen.noutrefresh()
     div.noutrefresh()
@@ -48,14 +47,18 @@ def body(screen):
     return div, txt
 
 
-def write_fortune(txt, arg):
-    txt.erase()
-    fortune = get_fortune(arg)
+def fortune(txt, arg):
+    from subprocess import check_output
     try:
-        txt.addstr(fortune)
+        txt.erase()
+        msg = check_output(["fortune", arg])
+        txt.addstr(msg)
+    except TypeError:
+        msg = "The soothsayer does not like being touched in that way."
+        txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
     except Exception:
         txt.erase()
-        msg = "The *nix soothsayer likes a larger terminal than this."
+        msg = "The soothsayer likes a larger terminal than this."
         txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
     finally:
         txt.refresh()
@@ -84,19 +87,12 @@ def eventloop(div, txt, screen):
         arg = key(div)
         if arg == "quit":
             return
-        write_fortune(txt, arg)
+        fortune(txt, arg)
         # refresh the windows from the bottom up
         screen.noutrefresh()
         div.noutrefresh()
         txt.noutrefresh()
         curses.doupdate
-
-
-def footer(screen):
-    msg = " Press (f) for a new fortune, (q) to quit."
-    screen.addstr(curses.LINES - 1, 0, msg)
-    screen.chgat(curses.LINES - 1, 7, 3, curses.A_BOLD | curses.color_pair(3))
-    screen.chgat(curses.LINES - 1, 30, 3, curses.A_BOLD | curses.color_pair(3))
 
 
 def cfortune(screen):

@@ -7,6 +7,7 @@ teller.*
 
 ## KEYBINDINGS
 
+| KEY    | ACTION                             |
 |--------|------------------------------------|
 | f SPC  | Display any old fortune.           |
 | s      | Display a short fortune.           |

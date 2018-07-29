@@ -1,4 +1,6 @@
 import curses
+import subprocess
+
 from cgitb import enable
 # Get more detailed traceback reports
 enable(format="text")  # https://pymotw.com/2/cgitb/
@@ -57,20 +59,23 @@ def body(screen):
 
 
 def fortune(txt, arg):
-    from subprocess import check_output
+    err, out = (None,)*2
+    txt.erase()
     try:
-        msg = check_output(["fortune", arg])
-        txt.addstr(msg)
+        out = subprocess.check_output(["fortune", arg])
     except TypeError:
-        msg = "The soothsayer does not like being touched in that way."
-        txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
+        err = "The soothsayer does not like being touched in that way."
+    except subprocess.CalledProcessError:
+        err = "That topic doesn't exist. Ya numpty."
     except Exception:
-        txt.erase()
-        msg = "The soothsayer likes a larger terminal than this."
-        txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
+        err = "The soothsayer likes a larger terminal than this."
     finally:
+        if err:
+            txt.addstr(err, curses.color_pair(1) | curses.A_BOLD)
+        elif out:
+            txt.addstr(out)
         txt.refresh()
-    return msg
+    return out
 
 
 def show(txt):
@@ -79,9 +84,10 @@ def show(txt):
         KEYBINDINGS:
 
         RET, SPC    : Display any old fortune.
-        s           : Display a short fortune.
+        f           | Enter a fortune topic.
         l           : Display a long fortune.
         o           : Display an offensive fortune.
+        s           : Display a short fortune.
         ?, h        : Display this help page.
         w           : Save your fortune.
         q, ESC      : Quit and display all marked paths.
@@ -93,7 +99,7 @@ def show(txt):
         msg = dedent(msg).strip()
         txt.addstr(msg)
         txt.chgat(0, 0, curses.color_pair(3) | curses.A_BOLD)
-        txt.chgat(10, 0, curses.color_pair(3) | curses.A_BOLD)
+        txt.chgat(11, 0, curses.color_pair(3) | curses.A_BOLD)
     except:
         msg = "The soothsayer is squished!"
         txt.addstr(msg, curses.color_pair(1) | curses.A_BOLD)
@@ -108,6 +114,11 @@ def key(div, txt, msg):
     c = div.getch()
     if c == ord('\n') or c == ord(' '):
         msg = fortune(txt, '-a')
+    elif c == ord('f') or c == ord('F'):
+        prompt = "Enter a fortune topic (c to cancel):"
+        arg = txtbox(txt, prompt).strip()
+        txt.erase()
+        msg = fortune(txt, arg)
     elif c == ord('w') or c == ord('W'):
         save = True
     elif c == ord('s') or c == ord('S'):
@@ -123,10 +134,10 @@ def key(div, txt, msg):
     return msg, save
 
 
-def getfile(txt):
+def txtbox(txt, prompt):
     from curses.textpad import Textbox
     curses.curs_set(1)
-    txt.addstr(0, 0, "Enter a file name (or c to cancel):")
+    txt.addstr(0, 0, prompt)
     txt.refresh()
     y, x = txt.getmaxyx()
     tb = txt.subwin(1, x - 1, 4, 2)
@@ -142,7 +153,8 @@ def savemsg(txt, msg):
     err, out = (None,)*2
     s = str(msg.decode("ascii"))
     home = str(Path.home())
-    name = getfile(txt)
+    prompt = "Enter a file name (or c to cancel):"
+    name = getfile(txt, prompt)
     if not name == 'c ':
         path = home + "/" + name
     try:

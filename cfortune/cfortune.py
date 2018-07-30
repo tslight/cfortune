@@ -61,9 +61,10 @@ def body(screen):
 
 def fortune(txt, args):
     err, out = (None,)*2
-    txt.erase()
     try:
         out = subprocess.check_output(args)
+        out = str(out.decode("ascii"))
+        txt.addstr(out)
     except TypeError:
         err = "The soothsayer does not like being touched in that way."
     except subprocess.CalledProcessError:
@@ -72,9 +73,8 @@ def fortune(txt, args):
         err = "The soothsayer likes a larger terminal than this."
     finally:
         if err:
+            txt.erase()
             txt.addstr(err, curses.color_pair(1) | curses.A_BOLD)
-        elif out:
-            txt.addstr(out)
         txt.refresh()
     return out
 

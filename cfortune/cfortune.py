@@ -159,16 +159,15 @@ def txtbox(txt, prompt):
 def savemsg(txt, msg):
     from pathlib import Path
     err, out = (None,)*2
-    s = str(msg.decode("ascii"))
     home = str(Path.home())
     prompt = "Enter a file name (or c to cancel):"
-    name = txtbox(txt, prompt)
+    name = txtbox(txt, prompt).strip()
     if not name == 'c ':
         path = home + "/" + name
     try:
         # removes need to use f.close
         with open(path, 'a+') as f:
-            f.write("\n" + s + "\n")
+            f.write("\n" + msg + "\n")
     except FileNotFoundError:
         err = "Can't find " + path
     except IsADirectoryError:

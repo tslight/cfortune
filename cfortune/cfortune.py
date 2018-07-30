@@ -118,14 +118,11 @@ def key(div, txt, msg):
         msg = fortune(txt, args)
     elif c == ord('f') or c == ord('F'):
         prompt = "Enter a fortune topic:"
-        args = ['fortune', txtbox(txt, prompt).strip(), '2>', '/dev/null']
-        txt.erase()
+        args = ['fortune', txtbox(txt, prompt).strip()]
         msg = fortune(txt, args)
     elif c == ord('m') or c == ord('M'):
         prompt = "Enter a search string:"
-        args = ['fortune', '-m',
-                txtbox(txt, prompt).strip(), '2>', '/dev/null']
-        txt.erase()
+        args = ['fortune', '-m', txtbox(txt, prompt).strip()]
         msg = fortune(txt, args)
     elif c == ord('w') or c == ord('W'):
         save = True

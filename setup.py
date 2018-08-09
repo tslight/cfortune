@@ -1,3 +1,6 @@
+# Copyright (c) 2018, Toby Slight. All rights reserved.
+# ISC License (ISCL) - see LICENSE file for details.
+
 import setuptools
 
 with open("README.md", "r") as fh:

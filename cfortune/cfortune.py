@@ -5,6 +5,7 @@ import curses
 import subprocess
 
 from cgitb import enable
+
 # Get more detailed traceback reports
 enable(format="text")  # https://pymotw.com/2/cgitb/
 
@@ -26,8 +27,7 @@ def color():
 
 def header(screen):
     msg = " GET YOUR FORTUNES HERE! "
-    screen.addstr(msg, curses.color_pair(10) |
-                  curses.A_BOLD | curses.A_REVERSE)
+    screen.addstr(msg, curses.color_pair(10) | curses.A_BOLD | curses.A_REVERSE)
     screen.chgat(-1, curses.color_pair(10) | curses.A_BOLD | curses.A_REVERSE)
 
 
@@ -35,14 +35,10 @@ def footer(screen):
     msg = " [SPC] for fortunes, [h] for help, [w] to save, [q] to quit."
     try:
         screen.addstr(curses.LINES - 1, 0, msg)
-        screen.chgat(curses.LINES - 1, 1, 5,
-                     curses.A_BOLD | curses.color_pair(3))
-        screen.chgat(curses.LINES - 1, 21, 3,
-                     curses.A_BOLD | curses.color_pair(3))
-        screen.chgat(curses.LINES - 1, 35, 3,
-                     curses.A_BOLD | curses.color_pair(3))
-        screen.chgat(curses.LINES - 1, 48, 3,
-                     curses.A_BOLD | curses.color_pair(3))
+        screen.chgat(curses.LINES - 1, 1, 5, curses.A_BOLD | curses.color_pair(3))
+        screen.chgat(curses.LINES - 1, 21, 3, curses.A_BOLD | curses.color_pair(3))
+        screen.chgat(curses.LINES - 1, 35, 3, curses.A_BOLD | curses.color_pair(3))
+        screen.chgat(curses.LINES - 1, 48, 3, curses.A_BOLD | curses.color_pair(3))
     except:
         pass
 
@@ -52,7 +48,7 @@ def body(screen):
     div.box()  # draw border around container window
     # use a sub-window so we don't clobber the the container window's border.
     txt = div.subwin(curses.LINES - 5, curses.COLS - 4, 2, 2)
-    args = ['fortune', '-a']
+    args = ["fortune", "-a"]
     msg = fortune(txt, args)
     # update internal window data structures
     screen.noutrefresh()
@@ -63,7 +59,7 @@ def body(screen):
 
 
 def fortune(txt, args):
-    err, out = (None,)*2
+    err, out = (None,) * 2
     try:
         out = subprocess.check_output(args)
         out = str(out.decode("ascii"))
@@ -72,8 +68,10 @@ def fortune(txt, args):
         err = "The soothsayer does not like being touched in that way."
     except subprocess.CalledProcessError:
         err = "That topic doesn't exist. Ya numpty."
-    except Exception:
-        err = "The soothsayer likes a larger terminal than this."
+    except FileNotFoundError:
+        err = "There is no soothsayer on this system.\nPlease install fortune."
+    except Exception as e:
+        err = f"The soothsayer likes a larger terminal than this.\n{e}"
     finally:
         if err:
             txt.erase()
@@ -84,7 +82,8 @@ def fortune(txt, args):
 
 def show(txt):
     from textwrap import dedent
-    msg = '''
+
+    msg = """
         KEYBINDINGS:
 
         RET, SPC    : Display any old fortune.
@@ -97,7 +96,7 @@ def show(txt):
         q, ESC      : Quit and display all marked paths.
 
         Good luck & God speed!
-        '''
+        """
     txt.erase()
     try:
         msg = dedent(msg).strip()
@@ -112,41 +111,43 @@ def show(txt):
 
 def key(div, txt, msg):
     from os import environ
-    environ.setdefault('ESCDELAY', '12')  # otherwise it takes an age!
+
+    environ.setdefault("ESCDELAY", "12")  # otherwise it takes an age!
     ESC = 27
     save = False
     c = div.getch()
-    if c == ord('\n') or c == ord(' '):
-        args = ['fortune', '-a']
+    if c == ord("\n") or c == ord(" "):
+        args = ["fortune", "-a"]
         msg = fortune(txt, args)
-    elif c == ord('f') or c == ord('F'):
+    elif c == ord("f") or c == ord("F"):
         prompt = "Enter a fortune topic:"
-        args = ['fortune', txtbox(txt, prompt).strip()]
+        args = ["fortune", txtbox(txt, prompt).strip()]
         msg = fortune(txt, args)
-    elif c == ord('m') or c == ord('M'):
+    elif c == ord("m") or c == ord("M"):
         prompt = "Enter a search string:"
-        args = ['fortune', '-m', txtbox(txt, prompt).strip()]
+        args = ["fortune", "-m", txtbox(txt, prompt).strip()]
         msg = fortune(txt, args)
-    elif c == ord('w') or c == ord('W'):
+    elif c == ord("w") or c == ord("W"):
         save = True
-    elif c == ord('s') or c == ord('S'):
-        args = ['fortune', '-s']
+    elif c == ord("s") or c == ord("S"):
+        args = ["fortune", "-s"]
         msg = fortune(txt, args)
-    elif c == ord('l') or c == ord('L'):
-        args = ['fortune', '-l', '-n', '300']
+    elif c == ord("l") or c == ord("L"):
+        args = ["fortune", "-l", "-n", "300"]
         msg = fortune(txt, args)
-    elif c == ord('o') or c == ord('O'):
-        args = ['fortune', '-o']
+    elif c == ord("o") or c == ord("O"):
+        args = ["fortune", "-o"]
         msg = fortune(txt, args)
-    elif c == ord('h') or c == ord('H') or c == ord('?'):
+    elif c == ord("h") or c == ord("H") or c == ord("?"):
         show(txt)
-    elif c == ord('q') or c == ord('Q') or c == ESC:
+    elif c == ord("q") or c == ord("Q") or c == ESC:
         quit()
     return msg, save
 
 
 def txtbox(txt, prompt):
     from curses.textpad import Textbox
+
     curses.curs_set(1)
     txt.addstr(0, 0, prompt)
     txt.refresh()
@@ -161,15 +162,16 @@ def txtbox(txt, prompt):
 
 def savemsg(txt, msg):
     from pathlib import Path
-    err, out = (None,)*2
+
+    err, out = (None,) * 2
     home = str(Path.home())
     prompt = "Enter a file name (or c to cancel):"
     name = txtbox(txt, prompt).strip()
-    if not name == 'c ':
+    if not name == "c ":
         path = home + "/" + name
     try:
         # removes need to use f.close
-        with open(path, 'a+') as f:
+        with open(path, "a+") as f:
             f.write("\n" + msg + "\n")
     except FileNotFoundError:
         err = "Can't find " + path
